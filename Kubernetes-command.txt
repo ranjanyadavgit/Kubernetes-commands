@@ -1,0 +1,26 @@
+kubernetes get deployment
+
+kubectl describe deployment deployment-example
+
+kubectl get deployment deployment-example -o wide
+
+image used for the deployment
+kubectl describe deployment deployment-example | grep -i image
+
+Check the history of deployment
+kubectl rollout history Deployment <Deploymet-name>
+
+Get more information about revision of the deployment
+kubectl rollout history Deployment <Deployment-name> --revision 1
+
+Rollback to any particular deployment deployment version:
+kubectl rollout undo deployment <Deployment-name> --to-revision=1
+
+Set new Docker image and record information for deployment:
+kubectl set image Deployment <Deployment-name> <container-name>=<new-image>
+
+Scale existing Deployment
+Kubectl scale deployment <Deployment-name> --replicas=10
+
+Rollout Undo
+Kubectl rollout undo Deployment <deployment-name>
