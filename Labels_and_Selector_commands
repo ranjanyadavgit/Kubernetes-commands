@@ -1,0 +1,111 @@
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod
+No resources found in default namespace.
+root@ip-172-31-2-84:/home/ubuntu# kubectl run web-dev --image=nginx
+pod/web-dev created
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod
+NAME      READY   STATUS    RESTARTS   AGE
+web-dev   1/1     Running   0          6s
+
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod --show-labels
+NAME      READY   STATUS    RESTARTS   AGE   LABELS
+web-dev   1/1     Running   0          65s   run=web-dev
+root@ip-172-31-2-84:/home/ubuntu# kubectl run db-dev --image=nginx
+pod/db-dev created
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod --show-labels
+NAME      READY   STATUS              RESTARTS   AGE   LABELS
+db-dev    0/1     ContainerCreating   0          2s    run=db-dev
+web-dev   1/1     Running             0          80s   run=web-dev
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod
+NAME      READY   STATUS    RESTARTS   AGE
+db-dev    1/1     Running   0          5s
+web-dev   1/1     Running   0          83s
+root@ip-172-31-2-84:/home/ubuntu# kubectl label pod db-dev env=dev name=db
+pod/db-dev labeled
+root@ip-172-31-2-84:/home/ubuntu# kubectl label pod web-dev env=dev name=web
+pod/web-dev labeled
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod --show-labels
+NAME      READY   STATUS    RESTARTS   AGE     LABELS
+db-dev    1/1     Running   0          2m5s    env=dev,name=db,run=db-dev
+web-dev   1/1     Running   0          3m23s   env=dev,name=web,run=web-dev
+-------------------------------------------------------------
+root@ip-172-31-2-84:/home/ubuntu# kubectl run web-prod --image=nginx
+pod/web-prod created
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pos
+error: the server doesn't have a resource type "pos"
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod
+NAME       READY   STATUS    RESTARTS   AGE
+db-dev     1/1     Running   0          4m36s
+web-dev    1/1     Running   0          5m54s
+web-prod   1/1     Running   0          7s
+root@ip-172-31-2-84:/home/ubuntu# kubectl run web-db --image=nginx --dry-run=client -o yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: web-db
+  name: web-db
+spec:
+  containers:
+  - image: nginx
+
+
+root@ip-172-31-2-84:/home/ubuntu# vi db-prod.yml
+root@ip-172-31-2-84:/home/ubuntu# vi db-prod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    env: prod
+    name: web-db
+  name: db-prod
+spec:
+  containers:
+  - image: nginx
+    name: db-prod
+
+root@ip-172-31-2-84:/home/ubuntu# kubectl apply -f db-prod.yml
+pod/db-prod created
+root@ip-172-31-2-84:/home/ubuntu# kubectl label pod web-prod env=prod name=web
+pod/web-prod labeled
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod --show-labels
+NAME       READY   STATUS    RESTARTS   AGE     LABELS
+db-dev     1/1     Running   0          20m     env=dev,name=db,run=db-dev
+db-prod    1/1     Running   0          9m44s   env=prod,name=web-db
+web-dev    1/1     Running   0          21m     env=dev,name=web,run=web-dev
+web-prod   1/1     Running   0          16m     env=prod,name=web,run=web-prod
+-----------------------------------------------------------------------------------
+Selectors
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod -l env=prod
+NAME       READY   STATUS    RESTARTS   AGE
+db-prod    1/1     Running   0          11m
+web-prod   1/1     Running   0          17m
+------------------------------------------------------------------------------
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod -l env=prod,name=web
+NAME       READY   STATUS    RESTARTS   AGE
+web-prod   1/1     Running   0          18m
+
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod --show-labels
+NAME       READY   STATUS    RESTARTS   AGE   LABELS
+db-dev     1/1     Running   0          25m   env=dev,name=db,run=db-dev
+db-prod    1/1     Running   0          14m   env=prod,name=web-db
+web-dev    1/1     Running   0          26m   env=dev,name=web,run=web-dev
+web-prod   1/1     Running   0          21m   env=prod,name=web,run=web-prod
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod dev-prod env-
+Error from server (NotFound): pods "dev-prod" not found
+Error from server (NotFound): pods "env-" not found
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod web-prod env-
+NAME       READY   STATUS    RESTARTS   AGE
+web-prod   1/1     Running   0          22m
+Error from server (NotFound): pods "env-" not found
+root@ip-172-31-2-84:/home/ubuntu# kubectl get pod --show-labels
+NAME       READY   STATUS    RESTARTS   AGE   LABELS
+db-dev     1/1     Running   0          26m   env=dev,name=db,run=db-dev
+db-prod    1/1     Running   0          16m   env=prod,name=web-db
+web-dev    1/1     Running   0          28m   env=dev,name=web,run=web-dev
+web-prod   1/1     Running   0          22m   env=prod,name=web,run=web-prod
+
+
+
